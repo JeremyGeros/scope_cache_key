@@ -17,7 +17,9 @@ module ScopeCacheKey
   #   Item.active.cache_key # => "0b27dac757428d88c0f3a0298eb0278e"
   #
   def cache_key
-    scope_sql = "SELECT subquery.id, subquery.updated_at FROM (#{scoped.to_sql}) as subquery"
+    scoped = self.connection.unprepared_statement { where(nil).to_sql }
+
+    scope_sql = "SELECT subquery.id, subquery.updated_at FROM (#{scoped}) as subquery"
 
     sql = "SELECT md5(array_agg(query.id || '-' || query.updated_at)::text) FROM (#{scope_sql}) as query"
 
